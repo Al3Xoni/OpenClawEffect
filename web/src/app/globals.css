@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+:root {
+  --background: #050505;
+  --foreground: #F3F4F6;
+  --primary: #00F0FF;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* --- UTILITIES --- */
+.text-glow {
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5), 0 0 20px rgba(0, 240, 255, 0.3);
+}
+
+.border-glow {
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes clawdMoveRight {
+  0% { transform: translateX(-20px); }
+  100% { transform: translateX(30px); }
+}
+
+@keyframes clawdBounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-5px); }
+}
+
+@keyframes clawdRoll {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-clawd-move {
+  animation: clawdMoveRight 4s linear infinite alternate;
+}
+
+.animate-clawd-bounce {
+  animation: clawdBounce 0.5s ease-in-out infinite alternate;
+}
+
+.animate-clawd-roll {
+  animation: clawdRoll 2s linear infinite;
+}
+
+/* --- CLAWDE OVERLAY ANIMATIONS --- */
+@keyframes pushStrain {
+  0% { transform: translateX(0) skewX(0deg); }
+  100% { transform: translateX(5px) skewX(-2deg); }
+}
+
+@keyframes slowRoll {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(10deg); }
+}
+
+.animate-push-strain {
+  animation: pushStrain 0.8s ease-in-out infinite alternate;
+}
+
+.animate-slow-roll {
+  animation: slowRoll 3s linear infinite;
+}
+
+/* Custom Solana Wallet Button Styles */
+.wallet-adapter-button {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  height: 32px !important;
+  padding: 0 12px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  border-radius: 9999px !important;
+  transition: all 0.2s !important;
+  font-family: inherit !important;
+}
+
+.wallet-adapter-button:not([disabled]):hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.wallet-adapter-button-trigger {
+  background-color: #06b6d4 !important; /* Cyan-500 */
+}
+
+.wallet-adapter-modal-wrapper {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 24px !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+

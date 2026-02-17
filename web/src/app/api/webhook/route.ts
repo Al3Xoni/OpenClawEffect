@@ -1,0 +1,113 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase with Service Role Key (Admin powers)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Config from env
+const TREASURY_WALLET = process.env.NEXT_PUBLIC_TREASURY_ADDRESS;
+const SNOW_MINT = process.env.NEXT_PUBLIC_SNOW_MINT;
+const TIMER_INCREMENT = parseInt(process.env.NEXT_PUBLIC_TIMER_INCREMENT || '180');
+const WEBHOOK_SECRET = process.env.HELIUS_WEBHOOK_SECRET;
+
+export async function POST(req: NextRequest) {
+    try {
+        // --- SECURITY CHECK ---
+        const authHeader = req.headers.get('authorization');
+        if (WEBHOOK_SECRET && authHeader !== WEBHOOK_SECRET) {
+            console.error("Unauthorized Webhook attempt!");
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const body = await req.json();
+
+        // Helius sends an array of transactions
+        if (!Array.isArray(body)) {
+            return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+        }
+
+        for (const tx of body) {
+            console.log(`[Webhook] Processing TX: ${tx.signature}, Type: ${tx.type}`);
+
+            // 1. Loose Validation: Allow any transfer type logic
+            // Helius Enhanced Tx might label Token-2022 transfers differently
+            
+            // 2. Find the specific token transfer in this transaction
+            if (!tx.tokenTransfers) {
+                console.log(`[Webhook] No tokenTransfers found in TX ${tx.signature}`);
+                continue;
+            }
+
+            const validTransfer = tx.tokenTransfers.find((transfer: any) => {
+                const isMintMatch = transfer.mint === SNOW_MINT;
+                const isTreasuryMatch = transfer.toUserAccount === TREASURY_WALLET;
+                
+                if (!isMintMatch || !isTreasuryMatch) {
+                    // Log mismatch for debugging (only first few to avoid spam)
+                    console.log(`[Webhook] Mismatch - Mint: ${transfer.mint} (Expected: ${SNOW_MINT}), To: ${transfer.toUserAccount} (Expected: ${TREASURY_WALLET})`);
+                }
+                return isMintMatch && isTreasuryMatch;
+            });
+
+            if (!validTransfer) {
+                console.log(`[Webhook] Ignoring TX ${tx.signature}: Not a valid $SNOW transfer to Treasury.`);
+                continue;
+            }
+
+            console.log(`[Webhook] Valid Push detected from ${validTransfer.fromUserAccount}! Amount: ${validTransfer.tokenAmount}`);
+
+            // 3. DATABASE ATOMIC UPDATE
+            // We update the game state: reset timer, increment push count, update last pusher
+            const newTimerEnd = new Date(Date.now() + TIMER_INCREMENT * 1000).toISOString();
+            
+            // Get current state to update last_pushers array
+            const { data: currentState } = await supabase
+                .from('game_state')
+                .select('last_pushers, push_count, treasury_balance, current_round_id')
+                .eq('id', 1)
+                .single();
+
+            const lastPushers = currentState?.last_pushers || [];
+            const currentRoundId = currentState?.current_round_id || 1;
+            const updatedPushers = [validTransfer.fromUserAccount, ...lastPushers].slice(0, 10);
+            const newPushCount = (currentState?.push_count || 0) + 1;
+            const newTreasuryBalance = (currentState?.treasury_balance || 0) + validTransfer.tokenAmount;
+
+            const { error: updateError } = await supabase
+                .from('game_state')
+                .update({
+                    timer_end: newTimerEnd,
+                    push_count: newPushCount,
+                    last_pushers: updatedPushers,
+                    treasury_balance: newTreasuryBalance,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', 1);
+
+            if (updateError) {
+                console.error("[Webhook] DB Update Error:", updateError);
+                continue;
+            }
+
+            // 4. LOG THE PUSH
+            await supabase.from('pushes').insert({
+                signature: tx.signature,
+                round_id: currentRoundId,
+                pusher_wallet: validTransfer.fromUserAccount,
+                amount: validTransfer.tokenAmount,
+                token_mint: SNOW_MINT,
+                block_time: new Date(tx.timestamp * 1000).toISOString()
+            });
+
+            console.log(`[Webhook] Game state updated for TX: ${tx.signature}`);
+        }
+
+        return NextResponse.json({ status: "ok" });
+
+    } catch (err: any) {
+        console.error("[Webhook] Fatal Error:", err.message);
+        return NextResponse.json({ error: err.message }, { status: 500 });
+    }
+}

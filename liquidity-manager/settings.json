@@ -1,0 +1,8 @@
+{
+  "step1_mc_sol": 500.0,
+  "step1_pct": 0.10,
+  "step2_mc_sol": 1000.0,
+  "step2_pct": 0.15,
+  "step3_mc_sol": 5000.0,
+  "step3_pct": 0.25
+}

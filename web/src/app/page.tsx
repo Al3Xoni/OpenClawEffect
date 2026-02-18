@@ -1,5 +1,6 @@
 "use client";
 
+// Build Version: 1.0.1 - Main Branch Trigger
 import dynamic from 'next/dynamic';
 import { HowItWorksBar } from "@/components/layout/HowItWorksBar";
 import { CryptoTicker } from "@/components/layout/CryptoTicker";

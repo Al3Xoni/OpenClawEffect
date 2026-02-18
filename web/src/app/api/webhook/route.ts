@@ -79,9 +79,9 @@ export async function POST(req: NextRequest) {
 
             const lastPushers = currentState?.last_pushers || [];
             const currentRoundId = currentState?.current_round_id || 1;
-            const updatedPushers = [validTransfer.fromUserAccount, ...lastPushers].slice(0, 10);
+            const updatedPushers = [pusherWallet, ...lastPushers].slice(0, 10);
             const newPushCount = (currentState?.push_count || 0) + 1;
-            const newTreasuryBalance = (currentState?.treasury_balance || 0) + validTransfer.tokenAmount;
+            const newTreasuryBalance = (currentState?.treasury_balance || 0) + amount;
 
             const { error: updateError } = await supabase
                 .from('game_state')
@@ -103,8 +103,8 @@ export async function POST(req: NextRequest) {
             await supabase.from('pushes').insert({
                 signature: tx.signature,
                 round_id: currentRoundId,
-                pusher_wallet: validTransfer.fromUserAccount,
-                amount: validTransfer.tokenAmount,
+                pusher_wallet: pusherWallet,
+                amount: amount,
                 token_mint: SNOW_MINT,
                 block_time: new Date(tx.timestamp * 1000).toISOString()
             });

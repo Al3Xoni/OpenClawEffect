@@ -1,47 +1,45 @@
 # Progress Summary - OpenClawEffect (v1.0.0)
 
-**Last Update:** Tuesday, February 17, 2026
-**Current Focus:** Transition to Modular Architecture & "Buy = Push" Mechanic
+**Last Update:** Wednesday, February 18, 2026
+**Current Focus:** Deployment Stability & Vercel 404 Fixes
 
 ---
 
-## 🚀 New Project Direction: OpenClawEffect
-The project is pivoting from a manual "Push" dApp to an automated **Live Game Tracker**. The snowball movement and game state will be triggered directly by on-chain swap events (Buys).
+## 🚀 Recent Changes (Feb 18)
 
-### 1. Core Concept: "Buy = Push"
-*   **Mechanism:** Any user buying the token on a DEX (Pump.fun/Raydium) triggers an automatic "Push" in the game.
-*   **Automation:** Helius Webhooks will monitor the blockchain for `SOL -> TOKEN` swaps.
-*   **No Button:** The "Push" button and mandatory wallet connection will be removed from the frontend.
+### 1. Deployment Fixes (Vercel)
+*   **Version Downgrade:** Corrected `package.json` by changing the non-existent `next: 16.1.1` to the stable `next: 15.1.1`. Downgraded `react` and `react-dom` to `19.0.0`.
+*   **Config Cleanup:** Removed `web/vercel.json` and eliminated the manual `distDir: '.next'` in `web/next.config.ts` to allow Vercel to use its native Next.js detection and routing.
+*   **Routing:** Verified the directory structure in `web/src/app` to ensure proper App Router behavior.
 
-### 2. Modular Architecture (Departments)
-*   **Watcher Dept:** Helius Webhooks + API route to process incoming blockchain transactions.
-*   **State Dept:** Supabase as the single source of truth for rounds, timer, and leaderboard.
-*   **Visual Dept:** Next.js frontend for real-time animations and data visualization.
-*   **Payout Dept:** Autonomous script to distribute SOL rewards from the Treasury to the last 3 buyers.
+### 2. "Buy = Push" Implementation (Logic)
+*   **Webhook Verified:** `web/src/app/api/webhook/route.ts` is configured to detect both direct transfers and DEX swaps (DEX logic using Helius transaction types).
+*   **Verification API:** `web/src/app/api/verify-push/route.ts` implemented for secondary transaction validation via RPC.
+*   **Supabase:** Logic for updating `game_state` and `pushes` tables is integrated into the API routes.
 
 ---
 
 ## 📍 Current Status
-*   **Branding:** Initial assets for "OpenClaw" are integrated (Logo, Overlay, Header).
-*   **Repository:** New repository "OpenClawEffect" initialized.
-*   **Environment:** Preparing for **Devnet** migration for testing the new modular logic.
+*   **Environment:** Switching to **Devnet** for final testing before Mainnet.
+*   **Deployment:** Pending new build on Vercel after the version fixes.
+*   **Domain:** `https://open-claw-effect.vercel.app/` (Currently debugging 404).
 
 ---
 
-## 🔮 Next Steps (Planned for Feb 18)
+## 🔮 Next Steps
 
-1.  **Frontend Cleanup:** Remove the manual "Push" button and refactor `AppWalletProvider` for optional viewing.
-2.  **Blockchain Watcher:** Implement the `/api/blockchain-watcher` endpoint to receive Helius swap data.
-3.  **Devnet Setup:**
-    *   Create a new test token on Devnet.
-    *   Update all `.env` files with Devnet RPCs, new Mint, and Treasury keys.
-    *   Reset Supabase tables for the new "Buy-Triggered" flow.
-4.  **Payout Strategy:** Define how the SOL Pot is funded (e.g., initial dev deposit or swap fees).
+1.  **Verify Vercel Build:** Monitor the deployment logs for the new build with Next.js 15.1.1.
+2.  **Devnet Testing:** 
+    *   Confirm Helius Webhook connectivity.
+    *   Simulate a "Buy" or Transfer to Treasury on Devnet.
+3.  **Frontend Polish:** Finalize the "How It Works" ticker and roadmap sections.
+4.  **Payout Automation:** Test `web/scripts/payout_manager.js` on Devnet.
 
 ---
 
-## 📂 Key Files to Modify Next
-*   `web/src/app/page.tsx` (UI Cleanup)
-*   `web/src/app/api/webhook/route.ts` (Transaction filtering logic)
-*   `web/.env` (Devnet Switch)
-*   `supabase_schema.sql` (Update for new event types)
+## 📂 Key Files Modified
+*   `web/package.json` (Version fixes)
+*   `web/next.config.ts` (Config cleanup)
+*   `web/vercel.json` (Deleted)
+*   `web/src/app/api/webhook/route.ts` (Webhook logic)
+*   `web/src/app/api/verify-push/route.ts` (Verification logic)

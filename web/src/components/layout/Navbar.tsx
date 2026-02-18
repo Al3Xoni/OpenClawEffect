@@ -41,15 +41,18 @@ export const Navbar: React.FC = () => {
         {/* CONTRACT ADDRESS (CA) DISPLAY */}
         <div 
           onClick={() => {
-            window.open("https://pump.fun/coin/EDauNNfEp1QvnBamXHnMd8C8H24hXfEURW8T6DDkpump", "_blank");
-            navigator.clipboard.writeText("EDauNNfEp1QvnBamXHnMd8C8H24hXfEURW8T6DDkpump");
+            const mint = process.env.NEXT_PUBLIC_SNOW_MINT || "";
+            if (mint) {
+                window.open(`https://pump.fun/coin/${mint}`, "_blank");
+                navigator.clipboard.writeText(mint);
+            }
           }}
           className="hidden lg:flex items-center gap-3 px-4 py-2 bg-black border border-[#D97757]/50 cursor-pointer hover:border-[#D97757] hover:bg-[#D97757]/10 transition-all group"
           title="Click to view on Pump.fun & Copy CA"
         >
           <span className="text-[10px] font-black text-[#D97757] tracking-widest">CA:</span>
           <span className="text-xs font-mono text-gray-400 group-hover:text-white transition-colors">
-            EDauNN...pump
+            {(process.env.NEXT_PUBLIC_SNOW_MINT || "CONFIG_MINT").slice(0, 6)}...pump
           </span>
         </div>
 

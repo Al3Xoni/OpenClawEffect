@@ -1,54 +1,47 @@
-# Progress Summary - Snowball Effect v2
+# Progress Summary - OpenClawEffect (v1.0.0)
 
-**Last Update:** Thursday, February 5, 2026
-**Current Focus:** Mainnet Launch ($SNOW)
+**Last Update:** Tuesday, February 17, 2026
+**Current Focus:** Transition to Modular Architecture & "Buy = Push" Mechanic
 
 ---
 
-## 🚀 Recent Accomplishments
+## 🚀 New Project Direction: OpenClawEffect
+The project is pivoting from a manual "Push" dApp to an automated **Live Game Tracker**. The snowball movement and game state will be triggered directly by on-chain swap events (Buys).
 
-### 1. Mainnet Migration (Final Token)
-*   **Token Address Updated:** Switched all systems to the final launch token: `EDauNNfEp1QvnBamXHnMd8C8H24hXfEURW8T6DDkpump`.
-*   **Bonding Curve Found:** Identified the new Bonding Curve PDA: `ADyTmWjVa8prQ7w9KtzbYM3ezKb8j66dNiRdoVGjyPj2`.
-*   **Environment Sync:**
-    *   `web/.env` & `.env.local`: Configured for Mainnet-Beta and Helius RPC.
-    *   `bots/.env`: Updated with the new Mint and high priority fees (50k microLamports).
-    *   `liquidity-manager/.env`: Configured with the new Mint and Bonding Curve.
-*   **UI/UX Updates:**
-    *   `Navbar.tsx`: Updated "Copy CA" button and display text.
-    *   `anchorClient.ts`: Updated hardcoded fallback for the mint.
+### 1. Core Concept: "Buy = Push"
+*   **Mechanism:** Any user buying the token on a DEX (Pump.fun/Raydium) triggers an automatic "Push" in the game.
+*   **Automation:** Helius Webhooks will monitor the blockchain for `SOL -> TOKEN` swaps.
+*   **No Button:** The "Push" button and mandatory wallet connection will be removed from the frontend.
 
-### 2. Infrastructure Readiness
-*   **Liquidity Manager:** Ready to monitor the new Bonding Curve and execute swaps on PumpSwap/Raydium.
-*   **Webhook / API:** `verify-push` and `webhook` routes are configured to listen for transfers of the new Token-2022 mint.
-*   **Bots:** Wallet keys are ready; awaiting funding with the new $SNOW token.
+### 2. Modular Architecture (Departments)
+*   **Watcher Dept:** Helius Webhooks + API route to process incoming blockchain transactions.
+*   **State Dept:** Supabase as the single source of truth for rounds, timer, and leaderboard.
+*   **Visual Dept:** Next.js frontend for real-time animations and data visualization.
+*   **Payout Dept:** Autonomous script to distribute SOL rewards from the Treasury to the last 3 buyers.
 
 ---
 
 ## 📍 Current Status
-
-The project is **Live-Ready** on Solana Mainnet.
-
-**Launch Configuration:**
-*   **Mint:** `EDauNNfEp1QvnBamXHnMd8C8H24hXfEURW8T6DDkpump`
-*   **Treasury:** `Djnmh6umG2NuBp4XoEmZrTzgotmq3Wn1fDLwZD2bErgf`
-*   **Bonding Curve:** `ADyTmWjVa8prQ7w9KtzbYM3ezKb8j66dNiRdoVGjyPj2`
-*   **Network:** `mainnet-beta`
+*   **Branding:** Initial assets for "OpenClaw" are integrated (Logo, Overlay, Header).
+*   **Repository:** New repository "OpenClawEffect" initialized.
+*   **Environment:** Preparing for **Devnet** migration for testing the new modular logic.
 
 ---
 
-## 🔮 Next Steps
+## 🔮 Next Steps (Planned for Feb 18)
 
-1.  **Vercel Deployment:** Update environment variables in the Vercel dashboard and trigger a production build.
-2.  **Bot Funding:** Distribute a small amount of $SNOW and SOL to each of the 10 bots.
-3.  **Liquidity Monitoring:** Start the Liquidity Manager Rust process once trading volume begins.
-4.  **Verification:** Monitor the first few pushes to ensure the Webhook correctly updates the Supabase game state.
+1.  **Frontend Cleanup:** Remove the manual "Push" button and refactor `AppWalletProvider` for optional viewing.
+2.  **Blockchain Watcher:** Implement the `/api/blockchain-watcher` endpoint to receive Helius swap data.
+3.  **Devnet Setup:**
+    *   Create a new test token on Devnet.
+    *   Update all `.env` files with Devnet RPCs, new Mint, and Treasury keys.
+    *   Reset Supabase tables for the new "Buy-Triggered" flow.
+4.  **Payout Strategy:** Define how the SOL Pot is funded (e.g., initial dev deposit or swap fees).
 
 ---
 
-## 📂 Key Files Modified
-*   `.env` (multiple locations)
-*   `web/src/core/solana/anchorClient.ts`
-*   `web/src/components/layout/Navbar.tsx`
-*   `web/scripts/find_curve.js`
-*   `liquidity-manager/.env`
+## 📂 Key Files to Modify Next
+*   `web/src/app/page.tsx` (UI Cleanup)
+*   `web/src/app/api/webhook/route.ts` (Transaction filtering logic)
+*   `web/.env` (Devnet Switch)
+*   `supabase_schema.sql` (Update for new event types)

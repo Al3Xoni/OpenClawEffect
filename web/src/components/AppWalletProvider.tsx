@@ -16,14 +16,16 @@ export default function AppWalletProvider({
 }) {
   // DYNAMIC NETWORK SELECTION
   // Default to Mainnet-beta unless explicitly set to devnet
-  const network = (process.env.NEXT_PUBLIC_NETWORK === 'devnet') 
+  const networkEnv = process.env.NEXT_PUBLIC_SOLANA_NETWORK || process.env.NEXT_PUBLIC_NETWORK || 'mainnet-beta';
+  const network = (networkEnv === 'devnet') 
     ? WalletAdapterNetwork.Devnet 
     : WalletAdapterNetwork.Mainnet;
 
   const endpoint = useMemo(() => {
     // 1. Priority: Custom RPC from Env (e.g. Helius)
-    if (process.env.NEXT_PUBLIC_SOLANA_RPC_URL) {
-        return process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
+    const customRpc = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || process.env.NEXT_PUBLIC_RPC_URL;
+    if (customRpc) {
+        return customRpc;
     }
     
     // 2. Fallback: Public Cluster API (Not recommended for Mainnet production)

@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 // Config from env
 const TREASURY_WALLET = process.env.NEXT_PUBLIC_TREASURY_ADDRESS;
 const SNOW_MINT = process.env.NEXT_PUBLIC_SNOW_MINT;
-const TIMER_INCREMENT = parseInt(process.env.NEXT_PUBLIC_TIMER_INCREMENT || '180');
+const TIMER_INCREMENT = parseInt(process.env.NEXT_PUBLIC_TIMER_INCREMENT || '1800');
 const WEBHOOK_SECRET = process.env.HELIUS_WEBHOOK_SECRET;
 
 export async function POST(req: NextRequest) {
@@ -31,35 +31,43 @@ export async function POST(req: NextRequest) {
         for (const tx of body) {
             console.log(`[Webhook] Processing TX: ${tx.signature}, Type: ${tx.type}`);
 
-            // 1. Loose Validation: Allow any transfer type logic
-            // Helius Enhanced Tx might label Token-2022 transfers differently
-            
-            // 2. Find the specific token transfer in this transaction
-            if (!tx.tokenTransfers) {
-                console.log(`[Webhook] No tokenTransfers found in TX ${tx.signature}`);
-                continue;
-            }
+            // 1. Detect SWAP (Buy) or TRANSFER to Treasury
+            let isPush = false;
+            let pusherWallet = "";
+            let amount = 0;
 
-            const validTransfer = tx.tokenTransfers.find((transfer: any) => {
-                const isMintMatch = transfer.mint === SNOW_MINT;
-                const isTreasuryMatch = transfer.toUserAccount === TREASURY_WALLET;
-                
-                if (!isMintMatch || !isTreasuryMatch) {
-                    // Log mismatch for debugging (only first few to avoid spam)
-                    console.log(`[Webhook] Mismatch - Mint: ${transfer.mint} (Expected: ${SNOW_MINT}), To: ${transfer.toUserAccount} (Expected: ${TREASURY_WALLET})`);
+            // CASE A: It's a SWAP (User bought the token on a DEX)
+            if (tx.type === "SWAP") {
+                const swapData = tx.tokenTransfers.find((t: any) => t.mint === SNOW_MINT);
+                if (swapData) {
+                    isPush = true;
+                    pusherWallet = swapData.toUserAccount; // The person who received the tokens (the buyer)
+                    amount = swapData.tokenAmount;
+                    console.log(`[Webhook] Swap detected! Buyer: ${pusherWallet}`);
                 }
-                return isMintMatch && isTreasuryMatch;
-            });
+            } 
+            
+            // CASE B: It's a direct transfer to Treasury (Legacy/Manual)
+            if (!isPush && tx.tokenTransfers) {
+                const validTransfer = tx.tokenTransfers.find((transfer: any) => {
+                    return transfer.mint === SNOW_MINT && transfer.toUserAccount === TREASURY_WALLET;
+                });
+                if (validTransfer) {
+                    isPush = true;
+                    pusherWallet = validTransfer.fromUserAccount;
+                    amount = validTransfer.tokenAmount;
+                    console.log(`[Webhook] Direct Transfer detected! From: ${pusherWallet}`);
+                }
+            }
 
-            if (!validTransfer) {
-                console.log(`[Webhook] Ignoring TX ${tx.signature}: Not a valid $SNOW transfer to Treasury.`);
+            if (!isPush) {
+                console.log(`[Webhook] Ignoring TX ${tx.signature}: Not a relevant Swap or Transfer.`);
                 continue;
             }
 
-            console.log(`[Webhook] Valid Push detected from ${validTransfer.fromUserAccount}! Amount: ${validTransfer.tokenAmount}`);
+            console.log(`[Webhook] Valid Push confirmed for ${pusherWallet}! Amount: ${amount}`);
 
             // 3. DATABASE ATOMIC UPDATE
-            // We update the game state: reset timer, increment push count, update last pusher
             const newTimerEnd = new Date(Date.now() + TIMER_INCREMENT * 1000).toISOString();
             
             // Get current state to update last_pushers array

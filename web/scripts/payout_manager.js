@@ -149,7 +149,7 @@ async function checkAndPayout() {
                 current_round_id: newRound.id,
                 push_count: 0,
                 last_pushers: [],
-                timer_end: new Date(Date.now() + 5000000).toISOString()
+                timer_end: new Date(Date.now() + 1800 * 1000).toISOString()
             }).eq('id', 1);
             
             console.log(`✨ New Round Started: ${newRound.id}`);

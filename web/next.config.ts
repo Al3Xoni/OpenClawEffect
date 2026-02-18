@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Simple config to start
+  // Simple config to start - Trigger Build Fix v3
   images: {
     remotePatterns: [],
   },

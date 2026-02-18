@@ -1,18 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Simple config to start - Trigger Build Fix v3
+  // Simple config to start - Trigger Build Fix v4
   images: {
     remotePatterns: [],
   },
+  optimizeFonts: false, // Disable failing font optimization
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has TypeScript errors.
     ignoreBuildErrors: true,
   },
 };

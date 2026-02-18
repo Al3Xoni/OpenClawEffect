@@ -1,11 +1,24 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Simple config to start - Trigger Build Fix v4
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        os: false,
+        path: false,
+        crypto: false, 
+        stream: false,
+        buffer: false,
+      };
+    }
+    return config;
+  },
   images: {
     remotePatterns: [],
   },
-  optimizeFonts: false, // Disable failing font optimization
+  optimizeFonts: false,
   eslint: {
     ignoreDuringBuilds: true,
   },

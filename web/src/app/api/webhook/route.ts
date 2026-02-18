@@ -12,6 +12,10 @@ const SNOW_MINT = process.env.NEXT_PUBLIC_SNOW_MINT;
 const TIMER_INCREMENT = parseInt(process.env.NEXT_PUBLIC_TIMER_INCREMENT || '1800');
 const WEBHOOK_SECRET = process.env.HELIUS_WEBHOOK_SECRET;
 
+export async function GET() {
+    return NextResponse.json({ status: "Webhook endpoint is active" });
+}
+
 export async function POST(req: NextRequest) {
     try {
         // --- SECURITY CHECK ---

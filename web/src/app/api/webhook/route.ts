@@ -2,18 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase with Service Role Key (Admin powers)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://localhost:54321";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "missing_key";
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Config from env
-const TREASURY_WALLET = process.env.NEXT_PUBLIC_TREASURY_ADDRESS;
-const SNOW_MINT = process.env.NEXT_PUBLIC_SNOW_MINT;
+const TREASURY_WALLET = process.env.NEXT_PUBLIC_TREASURY_ADDRESS || "";
+const SNOW_MINT = process.env.NEXT_PUBLIC_SNOW_MINT || "";
 const TIMER_INCREMENT = parseInt(process.env.NEXT_PUBLIC_TIMER_INCREMENT || '1800');
-const WEBHOOK_SECRET = process.env.HELIUS_WEBHOOK_SECRET;
+const WEBHOOK_SECRET = process.env.HELIUS_WEBHOOK_SECRET || "";
 
 export async function GET() {
-    return NextResponse.json({ status: "Webhook endpoint is active" });
+    return NextResponse.json({ 
+        status: "Webhook endpoint is active",
+        config: {
+            hasTreasury: !!TREASURY_WALLET,
+            hasMint: !!SNOW_MINT,
+            increment: TIMER_INCREMENT
+        }
+    });
 }
 
 export async function POST(req: NextRequest) {

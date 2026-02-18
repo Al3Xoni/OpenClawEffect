@@ -42,14 +42,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            window.global = window;
-            window.process = { env: {} };
-          `
-        }} />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${rubikMonoOne.variable} ${changaOne.variable} antialiased`}
       >

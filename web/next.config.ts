@@ -1,22 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        os: false,
-        path: false,
-        crypto: false, 
-        stream: false,
-      };
-    }
-    return config;
-  },
+  // Simple config to start
   images: {
-    domains: [],
+    remotePatterns: [],
   },
 };
+
+export default nextConfig;
 
 export default nextConfig;
